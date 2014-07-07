@@ -40,6 +40,7 @@ class TestMicrosite(TestCase):
         response = self.client.post(self.url, self.params)
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(UserSignupSource.objects.filter(site='openedx.localhost')), 0)
+
     def test_user_signup_from_non_micro_site(self):
         """
         test to create a user form the non-microsite. The record should not be saved

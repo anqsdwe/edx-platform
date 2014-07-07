@@ -35,6 +35,9 @@ TEST_CC_PROCESSOR = {
 
 
 def fakemicrosite(name, default=None):
+    """
+    This is a test mocking function to return a microsite configuration
+    """
     if name == 'cybersource_config_key':
         return 'test_microsite'
     else:

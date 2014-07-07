@@ -405,7 +405,6 @@ class PaidCourseRegistration(OrderItem):
 
         return total_cost
 
-
     @classmethod
     @transaction.commit_on_success
     def add_to_order(cls, order, course_id, mode_slug=CourseMode.DEFAULT_MODE_SLUG, cost=None, currency=None):

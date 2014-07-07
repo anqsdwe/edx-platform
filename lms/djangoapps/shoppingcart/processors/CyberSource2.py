@@ -7,12 +7,10 @@
 ### The name of this file should be used as the key of the dict in the CC_PROCESSOR setting
 ### Implementes interface as specified by __init__.py
 
-import time
 import hmac
 import binascii
 import re
 import json
-import logging
 import uuid
 from datetime import datetime
 from collections import OrderedDict, defaultdict
@@ -26,6 +24,7 @@ from shoppingcart.models import Order
 from shoppingcart.processors.exceptions import *
 from microsite_configuration import microsite
 from django.core.urlresolvers import reverse
+
 
 def get_cybersource_config():
     """
@@ -42,6 +41,7 @@ def get_cybersource_config():
         config = settings.CC_PROCESSOR['CyberSource2']
 
     return config
+
 
 def process_postpay_callback(params):
     """
@@ -107,10 +107,18 @@ def render_purchase_form_html(cart):
         'params': get_signed_purchase_params(cart),
     })
 
+
 def get_signed_purchase_params(cart):
+    """
+    This method will return a digitally signed set of CyberSource parameters
+    """
     return sign(get_purchase_params(cart))
 
+
 def get_purchase_params(cart):
+    """
+    This method will build out a dictionary of parameters needed by CyberSource to complete the transaction
+    """
     total_cost = cart.total_cost
     amount = "{0:0.2f}".format(total_cost)
     params = OrderedDict()
@@ -132,7 +140,8 @@ def get_purchase_params(cart):
     params['payment_method'] = 'card'
 
     if hasattr(cart, 'context') and 'request_domain' in cart.context:
-        params['override_custom_receipt_page'] = '{0}{1}'.format(cart.context['request_domain'],
+        params['override_custom_receipt_page'] = '{0}{1}'.format(
+            cart.context['request_domain'],
             reverse('shoppingcart.views.postpay_callback')
         )
 
@@ -140,7 +149,11 @@ def get_purchase_params(cart):
 
 
 def get_purchase_endpoint():
+    """
+    Helper function to return the CyberSource endpoint configuration
+    """
     return get_cybersource_config().get('PURCHASE_ENDPOINT', '')
+
 
 def payment_accepted(params):
     """
@@ -209,9 +222,9 @@ def record_purchase(params, order):
     Record the purchase and run purchased_callbacks
     """
     ccnum_str = params.get('req_card_number', '')
-    m = re.search("\d", ccnum_str)
-    if m:
-        ccnum = ccnum_str[m.start():]
+    mm = re.search("\d", ccnum_str)
+    if mm:
+        ccnum = ccnum_str[mm.start():]
     else:
         ccnum = "####"
 
@@ -249,7 +262,8 @@ def get_processor_decline_html(params):
         decision=params['decision'],
         reason_code=params['reason_code'],
         reason_msg=REASONCODE_MAP[params['reason_code']],
-        email=payment_support_email)
+        email=payment_support_email
+    )
 
 
 def get_processor_exception_html(exception):

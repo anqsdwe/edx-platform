@@ -74,7 +74,7 @@ class ShoppingCartViewsTests(ModuleStoreTestCase):
         add dummy coupon into models
         """
         coupon = Coupon(code=self.coupon_code, description='testing code', course_id=course_key,
-                         percentage_discount=self.percentage_discount, created_by=self.user, is_active=is_active)
+                        percentage_discount=self.percentage_discount, created_by=self.user, is_active=is_active)
         coupon.save()
 
     def add_course_to_user_cart(self):
