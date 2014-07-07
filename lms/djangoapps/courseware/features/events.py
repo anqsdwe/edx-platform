@@ -43,6 +43,11 @@ def n_events_are_emitted(_step, count, event_type, event_source):
     # Ensure all events are written out to mongo before querying.
     world.mongo_client.fsync()
 
+    # Note that splinter makes 2 requests when you call browser.visit('/foo')
+    # the first just checks to see if the server responds with a status
+    # code of 200, the next actually uses the browser to submit the request.
+    # We filter out events associated with the status code checks by ignoring
+    # events that come directly from splinter.
     criteria = {
         'event_type': event_type,
         'event_source': event_source,
@@ -52,11 +57,12 @@ def n_events_are_emitted(_step, count, event_type, event_source):
     }
 
     cursor = world.event_collection.find(criteria)
-    number_events = 1
+
     try:
         number_events = int(count)
     except:
-        pass
+        number_events = 1
+
     assert_equals(cursor.count(), number_events)
 
     event = cursor.next()
