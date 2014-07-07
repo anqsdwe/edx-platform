@@ -28,6 +28,16 @@ class GroupConfigurationsCreateTestCase(CourseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('New Group Configuration', response.content)
 
+    def test_bad_http_accept_header(self):
+        """
+        Test if not allowed header present in request.
+        """
+        response = self.client.get(
+            self.url,
+            HTTP_ACCEPT="text/plain",
+        )
+        self.assertEqual(response.status_code, 406)
+
     def test_list_page_ajax(self):
         """
         Check that the group configuration lists all configurations.
@@ -249,7 +259,7 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
             u'name': u'Test name'
         }
 
-        group_configuration = {
+        self.group_configuration = {
             u'description': u'Test description',
             u'id': 1,
             u'name': u'Test name',
@@ -259,8 +269,45 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
                 {u'id': 1, u'name': u'Group B', u'version': 1}
             ]
         }
+        self._set_user_partition(self.group_configuration)
+
+    def _set_user_partition(self, group_configuration):
         self.course.user_partitions = [UserPartition.from_json(group_configuration)]
         self.save_course()
+
+    def test_group_configuration_new(self):
+        """
+        PUT group configuration when no configurations exist in course.
+        """
+        # Make no partitions in course.
+        self.course.user_partitions = []
+        self.save_course()
+
+        edit_group_configuration = {
+            u'description': u'Edit Test description',
+            u'id': 1,
+            u'name': u'Edit Test name',
+            u'groups': [
+                {u'name': u'Group A'},
+                {u'name': u'Group B'}
+            ]
+        }
+        put_url = reverse_course_url(
+            'group_configurations_detail_handler',
+            self.course.id,
+            kwargs={'group_configuration_id': 1}
+        )
+        response = self.client.put(
+            put_url,
+            data=json.dumps(edit_group_configuration),
+            content_type="application/json",
+            HTTP_ACCEPT="application/json",
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        content = json.loads(response.content)
+        self.assertEqual(content['id'], u'1')
+        self.assertEqual(content['description'], 'Edit Test description')
+        self.assertEqual(content['name'], 'Edit Test name')
 
     def test_group_configuration_edit(self):
         """
@@ -292,8 +339,10 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
         self.assertEqual(content['description'], 'Edit Test description')
         self.assertEqual(content['name'], 'Edit Test name')
 
-    def test_group_configuration_url_id_not_exists(self):
-        # Group configuration id is not present in course.
+    def test_group_configuration_not_exists(self):
+        """
+        Group configuration is not present in course.
+        """
         bad_id = 100
         url = reverse_course_url(
             'group_configurations_detail_handler',
@@ -303,8 +352,10 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
-    def test_group_configuration_url_id_exists(self):
-        # Group configuration id is present in course.
+    def test_group_configuration_exists(self):
+        """
+        Group configuration with appropriate id is present in course.
+        """
         good_id = 1
         url = reverse_course_url(
             'group_configurations_detail_handler',
@@ -339,7 +390,7 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
                 {u'name': u'Group B'}
             ]
         }
-        # Group configuration id that present in course.
+        # Group configuration that present in course.
         put_url = reverse_course_url(
             'group_configurations_detail_handler',
             self.course.id,
@@ -357,7 +408,7 @@ class GroupConfigurationsDetailTestCase(CourseTestCase):
 
     def test_update_bad_group(self):
         """
-        Test if only one group in configuration exist on update.
+        Only one group in configuration exist on update.
         """
         # Only one group in group configuration here.
         bad_group_configuration = {

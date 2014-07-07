@@ -1045,7 +1045,7 @@ def group_configurations_detail_handler(request, course_key_string, group_config
             index = course.user_partitions.index(configuration)
             course.user_partitions[index] = UserPartition.from_json(new_configuration)
         else:
-            course.user_partitions.append(new_configuration)
+            course.user_partitions.append(UserPartition.from_json(new_configuration))
         store.update_item(course, request.user.id)
         return JsonResponse(new_configuration, status=201)
 
