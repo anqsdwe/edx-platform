@@ -843,7 +843,7 @@ class MongoModuleStore(ModuleStoreWriteBase):
         modules = self._load_items(course_id, list(items))
         return modules
 
-    def create_course(self, org, offering, user_id=None, fields=None, **kwargs):
+    def create_course(self, org, course, run, user_id=None, fields=None, **kwargs):
         """
         Creates and returns the course.
 
@@ -860,7 +860,6 @@ class MongoModuleStore(ModuleStoreWriteBase):
             InvalidLocationError: If a course with the same org and offering already exists
         """
 
-        course, _, run = offering.partition('/')
         course_id = SlashSeparatedCourseKey(org, course, run)
 
         # Check if a course with this org/course has been defined before (case-insensitive)

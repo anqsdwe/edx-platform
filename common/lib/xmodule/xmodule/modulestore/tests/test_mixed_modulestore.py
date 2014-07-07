@@ -122,11 +122,7 @@ class TestMixedModuleStore(LocMapperSetupSansDjango):
         """
         Create a course w/ one item in the persistence store using the given course & item location.
         """
-        if default == 'split':
-            offering = course_key.offering.replace('/', '.')
-        else:
-            offering = course_key.offering
-        course = self.store.create_course(course_key.org, offering)
+        course = self.store.create_course(course_key.org, course_key.course, course_key.run)
         category = self.writable_chapter_location.category
         block_id = self.writable_chapter_location.name
         chapter = self.store.create_item(
@@ -366,7 +362,7 @@ class TestMixedModuleStore(LocMapperSetupSansDjango):
         xml_store = self.store._get_modulestore_by_type(ModuleStoreEnum.Type.xml)
         # the important thing is not which exception it raises but that it raises an exception
         with self.assertRaises(AttributeError):
-            xml_store.create_course("org", "course/run", 999)
+            xml_store.create_course("org", "course", "run", 999)
 
     @ddt.data('draft', 'split')
     def test_get_course(self, default_ms):
