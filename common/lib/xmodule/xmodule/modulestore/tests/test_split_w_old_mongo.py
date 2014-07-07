@@ -41,7 +41,7 @@ class SplitWMongoCourseBoostrapper(unittest.TestCase):
         'xblock_mixins': (InheritanceMixin,)
     }
 
-    split_course_key = CourseLocator('test_org', 'test_course.runid', branch=ModuleStoreEnum.BranchName.draft)
+    split_course_key = CourseLocator('test_org', 'test_course', 'runid', branch=ModuleStoreEnum.BranchName.draft)
 
     def setUp(self):
         self.db_config['collection'] = 'modulestore{0}'.format(uuid.uuid4().hex[:5])
