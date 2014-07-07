@@ -36,41 +36,8 @@ def reset_between_outline_scenarios(_scenario, order, outline, reasons_to_fail):
     world.event_collection.drop()
 
 
-@step('[aA]n? "(.*)" (server|browser) event is emitted')
-def event_is_emitted(_step, event_type, event_source):
 
-    # Ensure all events are written out to mongo before querying.
-    world.mongo_client.fsync()
-
-    # Note that splinter makes 2 requests when you call browser.visit('/foo')
-    # the first just checks to see if the server responds with a status
-    # code of 200, the next actually uses the browser to submit the request.
-    # We filter out events associated with the status code checks by ignoring
-    # events that come directly from splinter.
-    criteria = {
-        'event_type': event_type,
-        'event_source': event_source,
-        'agent': {
-            '$ne': 'python/splinter'
-        }
-    }
-    cursor = world.event_collection.find(criteria)
-    assert_equals(cursor.count(), 1)
-
-    event = cursor.next()
-
-    expected_field_values = {
-        "username": world.scenario_dict['USER'].username,
-        "event_type": event_type,
-    }
-    for key, value in expected_field_values.iteritems():
-        assert_equals(event[key], value)
-
-    for field in REQUIRED_EVENT_FIELDS:
-        assert_in(field, event)
-
-
-@step('(\d+) "(.*)" (server|browser) events are emitted$')
+@step('([aA]n?|\d+) "(.*)" (server|browser) events? is emitted$')
 def n_events_are_emitted(_step, count, event_type, event_source):
 
     # Ensure all events are written out to mongo before querying.
@@ -83,8 +50,14 @@ def n_events_are_emitted(_step, count, event_type, event_source):
             '$ne': 'python/splinter'
         }
     }
+
     cursor = world.event_collection.find(criteria)
-    assert_equals(cursor.count(), int(count))
+    number_events = 1
+    try:
+        number_events = int(count)
+    except:
+        pass
+    assert_equals(cursor.count(), number_events)
 
     event = cursor.next()
 

@@ -387,7 +387,7 @@ class TestMidCourseReverifyView(TestCase):
         response = self.client.get(url)
 
         # Check that user entering the reverify flow was logged
-        self.mock_tracker.emit.assert_called_once_with(  # pylint: disable=maybe-no-member
+        self.mock_tracker.emit.assert_called_with(  # pylint: disable=maybe-no-member
             'edx.course.enrollment.reverify.started',
             {
                 'user_id': self.user.id,
@@ -409,7 +409,7 @@ class TestMidCourseReverifyView(TestCase):
         response = self.client.post(url, {'face_image': ','})
 
         # Check that submission event was logged
-        self.mock_tracker.emit.assert_called_once_with(  # pylint: disable=maybe-no-member
+        self.mock_tracker.emit.assert_called_with(  # pylint: disable=maybe-no-member
             'edx.course.enrollment.reverify.submitted',
             {
                 'user_id': self.user.id,

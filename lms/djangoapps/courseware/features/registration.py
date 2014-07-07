@@ -21,7 +21,6 @@ def i_register_to_audit_the_course(_step, course):
     world.browser.visit(url)
     world.css_click('section.intro a.register')
     audit_button = world.browser.find_by_name("audit_mode")
-    print audit_button
     audit_button.click()
 
     assert world.is_css_present('section.container.dashboard')

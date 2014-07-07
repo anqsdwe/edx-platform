@@ -444,14 +444,14 @@ class EnrollInCourseTest(TestCase):
         CourseEnrollment.enroll(user, course_id)
         self.assert_enrollment_event_was_emitted(user, course_id)
 
-        CourseEnrollment.enroll(user, course_id,"audit")
+        CourseEnrollment.enroll(user, course_id, "audit")
         self.assert_enrollment_mode_change_event_was_emitted(user, course_id, "audit")
 
         # same enrollment mode does not emit an event
-        CourseEnrollment.enroll(user, course_id,"audit")
+        CourseEnrollment.enroll(user, course_id, "audit")
         self.assert_no_events_were_emitted()
 
-        CourseEnrollment.enroll(user, course_id,"honor")
+        CourseEnrollment.enroll(user, course_id, "honor")
         self.assert_enrollment_mode_change_event_was_emitted(user, course_id, "honor")
 
 
