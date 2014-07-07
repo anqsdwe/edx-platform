@@ -6,18 +6,19 @@ import json
 import os
 from unittest import skip, skipUnless
 
-from ..fixtures.course import CourseFixture, XBlockFixtureDesc
+from xmodule.partitions.partitions import Group, UserPartition
+from bok_choy.promise import Promise
 
+from ..fixtures.course import CourseFixture, XBlockFixtureDesc
 from ..pages.studio.component_editor import ComponentEditorView
 from ..pages.studio.settings_advanced import AdvancedSettingsPage
 from ..pages.studio.settings_group_configurations import GroupConfigurationsPage
 from ..pages.studio.auto_auth import AutoAuthPage
-from test_studio_container import ContainerBase
 from ..pages.studio.utils import add_advanced_component
-from xmodule.partitions.partitions import Group, UserPartition
-from bok_choy.promise import Promise
-
+from ..pages.xblock.utils import wait_for_xblock_initialization
 from .helpers import UniqueCourseTest
+
+from test_studio_container import ContainerBase
 
 
 class SplitTest(ContainerBase):
@@ -141,12 +142,16 @@ class SplitTest(ContainerBase):
         container = self.go_to_container_page()
         self.verify_groups(container, ['Group 0', 'Group 1', 'Group 2'], ['alpha', 'beta'])
 
-    @skip("This fails periodically where it fails to trigger the add missing groups action.Dis")
     def test_missing_group(self):
         """
         The case of a split test with invalid configuration (missing group).
         """
         container = self.create_poorly_configured_split_instance()
+
+        # Wait for the xblock to be fully initialized so that the add button is rendered
+        wait_for_xblock_initialization(self, '.xblock[data-block-type="split_test"]')
+
+        # Click the add button and verify that the groups were added on the page
         container.add_missing_groups()
         self.verify_groups(container, ['alpha', 'gamma'], ['beta'])
 

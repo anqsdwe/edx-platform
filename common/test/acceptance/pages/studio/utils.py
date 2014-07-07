@@ -21,6 +21,18 @@ def click_css(page, css, source_index=0, require_notification=True):
         wait_for_notification(page)
 
 
+def wait_for_xblock_initialization(self, xblock_css):
+    """
+    Wait for the xblock with the given CSS to finish initializing.
+    """
+    def _is_finished_loading():
+        # Wait for the xblock javascript to finish initializing
+        is_done = self.browser.execute_script("return $({!r}).data('initialized')".format(xblock_css))
+        return (is_done, is_done)
+
+    return Promise(_is_finished_loading, 'Finished initializing the xblock.').fulfill()
+
+
 def wait_for_notification(page):
     """
     Waits for the "mini-notification" to appear and disappear on the given page (subclass of PageObject).
